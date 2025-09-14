@@ -1,2 +1,2 @@
 # fitness_chatbot
-AI mini project
+AI mini project!
