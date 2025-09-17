@@ -10,11 +10,9 @@ export default function Chat() {
     const userMsg = { role: "user", text: input };
     setMessages([...messages, userMsg]);
     setInput("");
-
-    const BACKEND_URL =
-      window.location.hostname.includes("github.dev")
-      ? `https://${window.location.hostname.split("-3000")[0]}-8000.preview.app.github.dev`
-      : "http://127.0.0.1:8000";
+    const BACKEND_URL =window.location.hostname.includes("github.dev")
+    ? "https://solid-space-winner-97q67vj5pr7xcxgxv-8000.app.github.dev"
+    : "http://127.0.0.1:8000";
 
     const res = await axios.post(`${BACKEND_URL}/chat`, { message: input });
     const botMsg = { role: "bot", text: res.data.reply };
