@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from openai import OpenAI
-import os, dotenv
+from transformers import pipeline
 
-dotenv.load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Load Hugging Face instruction model (bigger one for better answers)
+generator = pipeline("text2text-generation", model="google/flan-t5-large")
+
 app = FastAPI()
 
 app.add_middleware(
@@ -20,11 +20,13 @@ class Message(BaseModel):
 
 @app.post("/chat")
 def chat(data: Message):
-    resp = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a workout planner assistant."},
-            {"role": "user", "content": data.message}
-        ]
-    )
-    return {"reply": resp.choices[0].message.content}
+    try:
+        # Give clear instruction so model knows to generate a plan
+        prompt = f"Provide a detailed helpful response:\n{data.message}"
+        result = generator(prompt, max_length=400)
+        reply = result[0]["generated_text"]
+    except Exception as e:
+        print("ERROR:", e)
+        reply = "Sorry, there was a problem generating a response."
+
+    return {"reply": reply}
